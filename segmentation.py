@@ -14,9 +14,9 @@ def dist_color(image, s, x1, y1, x2, y2):
     a1 = image[x1, y1, 1]
     b1 = image[x1, y1, 2]
 
-    l2 = image[x1, y1, 0]
-    a2 = image[x1, y1, 1]
-    b2 = image[x1, y1, 2]
+    l2 = image[x2, y2, 0]
+    a2 = image[x2, y2, 1]
+    b2 = image[x2, y2, 2]
 
     dLab = np.sqrt((l1 - l2)**2 + (a1 - a2)**2 + (b1 - b2)**2)
     dxy = dist(x1, y1, x2, y2)
