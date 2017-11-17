@@ -4,8 +4,8 @@ from scipy import fftpack
 
 
 #Load in images
-img = cv2.imread("Images/uwstout.jpg", cv2.IMREAD_COLOR)
-frosted = cv2.imread("Images/uwstoutfrosted.jpg", cv2.IMREAD_COLOR)
+img = cv2.imread("Images/lemons.png", cv2.IMREAD_GRAYSCALE)
+frosted = cv2.imread("Images/frostedlemons.png", cv2.IMREAD_GRAYSCALE)
 
 def scale_dft_image(DFT_image):
     scaled = np.log(1. + np.real(np.absolute(DFT_image)))
