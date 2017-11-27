@@ -1,8 +1,7 @@
 import numpy as np
 import cv2
-import random
 import segmentation
-from skimage.segmentation import slic
+import lead
 
 ##Return a numpy array close to a circle for use as a kernel
 def circle_n(radius):
@@ -12,14 +11,8 @@ def circle_n(radius):
 
 plus = np.array([[0,1,0],[1,1,1],[0,1,0]])
 
-## SLIC Parameters
-NUM_SEGMENTS = 150 #100
-SIGMA = 4#4
-COMPACTNESS = 80 #50 #M parameter
-ENFORCE_CONNECT = 1
-
 ##Import image
-img = cv2.imread("dinosaur.png")
+img = cv2.imread("Images/Green Cavern.jpg")
 img[img != 255] = img[img != 255] + 1
 print(np.shape(img))
 
@@ -27,22 +20,22 @@ print(np.shape(img))
 height, width = np.shape(img)[:2]
 
 ##Get SLIC Segments
-#segments_slic = slic(img, n_segments=NUM_SEGMENTS, sigma=SIGMA, enforce_connectivity=ENFORCE_CONNECT, compactness=COMPACTNESS)
-segments_slic = segmentation.segment(img, 10,10, 250)
+segments_slic = segmentation.segment(img, 10, 10, 250, 1)
 print(np.max(segments_slic))
 NUM_CREATED = np.max(segments_slic)
 
 ##Make array of 1-bit images for morphology
-segments = np.zeros((NUM_CREATED+1,height,width), dtype=np.uint8)
+segments = np.zeros((NUM_CREATED+1, height, width), dtype=np.uint8)
 for i in range(0, NUM_CREATED+1):
     segments[i][segments_slic == i] = 255
     #cv2.imshow(str(i), segments[i])
 
     i2 = str(i) + str(2)
     ##Morphology things and stuff
-    segments[i] = cv2.morphologyEx(segments[i], cv2.MORPH_CLOSE, kernel = circle_n(2))
+    segments[i] = cv2.medianBlur(segments[i], 21)
+    segments[i] = cv2.morphologyEx(segments[i], cv2.MORPH_CLOSE, kernel=circle_n(2))
     segments[i] = cv2.morphologyEx(segments[i], cv2.MORPH_OPEN, kernel=circle_n(2))
-    segments[i] = cv2.morphologyEx(segments[i], cv2.MORPH_ERODE, kernel=circle_n(3))
+    segments[i] = cv2.morphologyEx(segments[i], cv2.MORPH_ERODE, kernel=circle_n(2))
     #cv2.imshow(i2, segments[i])
 
 ##Set pixel intensities of each segment to the average of the segment
@@ -53,35 +46,17 @@ for i in range(0, NUM_CREATED+1):
 
 
 ##Construct final image from 1-bit segments
-finCanvas = np.zeros((height,width, 3), dtype = np.uint8)
+finCanvas = np.zeros((height, width, 3), dtype=np.uint8)
 for i in range(0, NUM_CREATED+1):
     finCanvas[segments[i] == 255] = img[segments[i] == 255]
 
 ##Make segment seperations gray
-finCanvas[finCanvas == 0] = 80
-
-##Shift some pixel intensities slightly to make the image not perfect
-#MAX_RAND = 35 #Max value a pixel intensity can change
-#for y in range(0, height):
-#    for x in range(0, width):
-#        if(random.randint(0, 5) == 5):
-#            rand_add = random.randint(5, MAX_RAND)
-#
-#            if(finCanvas[y,x,0] + rand_add < 255):
-#               finCanvas[y,x,0] = finCanvas[y,x,0] + rand_add
-#            else:
-#                finCanvas[y, x, 0] = 255
-
-#            if (finCanvas[y, x, 1] + rand_add < 255):
-#                finCanvas[y, x, 1] = finCanvas[y, x, 1] + rand_add
-#            else:
-#                finCanvas[y, x, 1] = 255
-
-#            if (finCanvas[y, x, 2] + rand_add < 255):
-#                finCanvas[y, x, 2] = finCanvas[y, x, 2] + rand_add
-#            else:
-#                finCanvas[y, x, 2] = 255
-
+lead_img = lead.lead(height, width)
+##This needs to be done better
+for y in range(0, height):
+    for x in range(0, width):
+        if finCanvas[y, x].all() == 0:
+            finCanvas[y, x] = lead_img[y, x]
 
 ##Cut off pixel intensities too large or small
 finCanvas[finCanvas < 0] = 0
