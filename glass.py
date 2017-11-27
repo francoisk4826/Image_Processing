@@ -25,6 +25,18 @@ frosted_DFT_scaled = scale_dft_image(frosted_DFT_shift)
 #Get the mask
 mask = frosted_DFT_scaled - img_DFT_scaled
 
+def glass (image,mask):
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2HLS)
+    img_hsl_float = np.float64(image)/255.
+    transform = fftpack.fft2(img_hsl_float[:, :, 2])
+    transform_shift = fftpack.fftshift(transform)
+    transform_scaled = scale_dft_image(transform_shift)
+
+    FTransform =  transform_scaled + mask
+    Inverse = np.round(np.real(fftpack.ifft2(fftpack.ifftshift(FTransform))))
+    return Inverse
+
+
 cv2.imshow("window",img_DFT_scaled[::2,::2])
 cv2.imshow("frost",frosted_DFT_scaled[::2,::2])
 cv2.imshow("Mask", mask[::2,::2])
