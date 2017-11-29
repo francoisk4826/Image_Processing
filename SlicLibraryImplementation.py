@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 import segmentation
 import lead
+import glass
+from scipy import fftpack
 
 ##Return a numpy array close to a circle for use as a kernel
 def circle_n(radius):
@@ -12,7 +14,7 @@ def circle_n(radius):
 plus = np.array([[0,1,0],[1,1,1],[0,1,0]])
 
 ##Import image
-img = cv2.imread("Images/Green Cavern.jpg")
+img = cv2.imread("Images/Steven.jpg")
 img[img != 255] = img[img != 255] + 1
 print(np.shape(img))
 
@@ -43,6 +45,8 @@ for i in range(0, NUM_CREATED+1):
     img[segments[i] == 255, 0] = np.average(img[segments[i] == 255, 0])
     img[segments[i] == 255, 1] = np.average(img[segments[i] == 255, 1])
     img[segments[i] == 255, 2] = np.average(img[segments[i] == 255, 2])
+
+img = glass.glass(img)
 
 
 ##Construct final image from 1-bit segments
