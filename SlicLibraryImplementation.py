@@ -22,7 +22,7 @@ print(np.shape(img))
 height, width = np.shape(img)[:2]
 
 ##Get SLIC Segments
-segments_slic = segmentation.segment(img, 10, 10, 250, 1)
+segments_slic = segmentation.segment(img, 10, 10, 250, 10)
 print(np.max(segments_slic))
 NUM_CREATED = np.max(segments_slic)
 
@@ -55,8 +55,10 @@ for i in range(0, NUM_CREATED+1):
     finCanvas[segments[i] == 255] = img[segments[i] == 255]
 
 ##Make segment seperations gray
-lead_img = lead.lead(height, width)
-##This needs to be done better
+lead_base = np.zeros((height, width, 3), dtype=np.uint8)
+lead_base[finCanvas == 0] = 20
+lead_base = cv2.cvtColor(lead_base, cv2.COLOR_BGR2GRAY)
+lead_img = lead.lead(lead_base)
 for y in range(0, height):
     for x in range(0, width):
         if finCanvas[y, x].all() == 0:

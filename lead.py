@@ -1,29 +1,31 @@
 import numpy as np
 import cv2
+import math
+from scipy import signal
 
-NOISE_AMOUNT = 5
-MOTION_BLUR_SIZE = 35
-BLUR_SIZE = 15
+THETA = 125
 
 
-def lead(h, w):
-    lead_base = np.zeros((h, w, 3), dtype=np.uint8)
-    lead_base[:, :] = 100
-    lead_base[:, 1 * (h // 5):2 * (h // 5)] = 180
-    lead_base[:, 3 * (h // 5):4 * (h // 5)] = 180
-    blur = np.ones((BLUR_SIZE, BLUR_SIZE)) / BLUR_SIZE**2
-    lead_blur = cv2.filter2D(lead_base, -1, blur)
-    for i in range(0, 50):
-        lead_blur = cv2.filter2D(lead_blur, -1, blur)
+def normalize(image):
+    max_intensities = np.max(image)
+    min_intensities = np.min(image)
+    return np.uint8(np.round(image-min_intensities)/(max_intensities-min_intensities)*255.0)
 
-    noise = np.zeros((h, w))
-    cv2.randu(noise, 0, 100)
-    lead_noise = np.copy(lead_blur)
-    lead_noise[noise > 100 - NOISE_AMOUNT] = 255
 
-    motion_blur = np.zeros((MOTION_BLUR_SIZE, MOTION_BLUR_SIZE))
-    motion_blur[int((MOTION_BLUR_SIZE - 1) / 2), :] = np.ones(MOTION_BLUR_SIZE)
-    motion_blur = motion_blur / MOTION_BLUR_SIZE
-    lead_motion_blur = cv2.filter2D(lead_noise, -1, motion_blur)
+def lead(image_base):
+    sobel_x = np.array([[1, 0, -1],
+                        [2, 0, -2],
+                        [1, 0, -1]])
 
-    return lead_motion_blur
+    sobel_y = np.array([[1, 2, 1],
+                        [0, 0, 0],
+                        [-1, -2, -1]])
+
+    image_sobel = signal.convolve2d(image_base, (math.cos(math.radians(THETA))*sobel_x + math.sin(math.radians(THETA))*sobel_y), mode='same')
+    image_sobel = normalize(image_sobel)
+    return image_sobel
+
+
+# cv2.imshow("Lead", lead(512, 512))
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
