@@ -22,6 +22,7 @@ print(np.shape(img))
 height, width = np.shape(img)[:2]
 
 ##Get SLIC Segments
+#(img, rows, columns, m, iterations)
 segments_slic = segmentation.segment(img, 10, 10, 250, 10)
 print(np.max(segments_slic))
 NUM_CREATED = np.max(segments_slic)
