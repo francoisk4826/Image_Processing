@@ -4,6 +4,8 @@ import math
 from scipy import signal
 
 THETA = 125
+BLUR_SIZE = 3
+GAMMA = 1.5
 
 
 def normalize(image):
@@ -23,7 +25,15 @@ def lead(image_base):
 
     image_sobel = signal.convolve2d(image_base, (math.cos(math.radians(THETA))*sobel_x + math.sin(math.radians(THETA))*sobel_y), mode='same')
     image_sobel = normalize(image_sobel)
-    return image_sobel
+
+    kernel = np.ones((BLUR_SIZE, BLUR_SIZE), np.float64) / BLUR_SIZE**2
+    image_blur = cv2.filter2D(image_sobel, -1, kernel)
+
+    img_float = np.float64(image_blur) / 255
+    img_float = img_float ** GAMMA
+    image_gamma = np.uint8(255 * img_float)
+
+    return image_gamma
 
 
 # cv2.imshow("Lead", lead(512, 512))
