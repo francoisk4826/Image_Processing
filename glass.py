@@ -2,26 +2,40 @@ import numpy as np
 import cv2
 from scipy import fftpack
 
-
+GAMMA = 1.5
 #Load in images
-
-glass_effect = cv2.imread("Images/my_glasseffect1.png", cv2.IMREAD_COLOR)
 
 #display the mirror image
 #glass_effect=glass_effect[:,::-1]
 
 
-glass_effect_hsl = cv2.cvtColor(glass_effect,cv2.COLOR_BGR2HLS)
+def normalize(image):
+    max_intensities = np.max(image)
+    min_intensities = np.min(image)
+    return np.uint8(np.round(image-min_intensities)/(max_intensities-min_intensities)*255.0)
 
 
-def glass (image):
+def glass(image):
+    glass_image = cv2.imread("Images/watercolor.jpg", cv2.IMREAD_GRAYSCALE)
+
     image_height, image_width = np.shape(image)[:2]
-    image_hsl = cv2.cvtColor(image,cv2.COLOR_BGR2HLS)
 
-    image_hsl[:,:,1]=glass_effect_hsl[:image_height,:image_width,1]
+    #this is here instead of hardcoding the height and width of the passed in superpixel image
+    glass_effect=glass_image[:image_height,:image_width]
 
-    glass_image = cv2.cvtColor(image_hsl,cv2.COLOR_HLS2BGR)
-    return glass_image
+    for y in range(0, image_height):
+        for x in range(0, image_width):
+            image[y, x, 0] = np.uint8((np.uint64(image[y, x, 0]) + np.uint64(glass_effect[y, x])) // 2)
+            image[y, x, 1] = np.uint8((np.uint64(image[y, x, 1]) + np.uint64(glass_effect[y, x])) // 2)
+            image[y, x, 2] = np.uint8((np.uint64(image[y, x, 2]) + np.uint64(glass_effect[y, x])) // 2)
+
+
+    normal_image = normalize(image)
+    imgFloat = np.float64(normal_image) / 255.
+    imgFloat = imgFloat ** GAMMA
+    img = np.uint8(255. * (imgFloat))
+
+    return img
 
 #glass(image)
 

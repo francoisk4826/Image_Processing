@@ -14,7 +14,7 @@ def circle_n(radius):
 plus = np.array([[0,1,0],[1,1,1],[0,1,0]])
 
 ##Import image
-img = cv2.imread("Images/Steven.jpg")
+img = cv2.imread("Images/dog.jpg")
 img[img != 255] = img[img != 255] + 1
 print(np.shape(img))
 
@@ -23,7 +23,7 @@ height, width = np.shape(img)[:2]
 
 ##Get SLIC Segments
 #(img, rows, columns, m, iterations)
-segments_slic = segmentation.segment(img, 10, 10, 250, 10)
+segments_slic = segmentation.segment(img, 10, 10, 250, 5)
 print(np.max(segments_slic))
 NUM_CREATED = np.max(segments_slic)
 
